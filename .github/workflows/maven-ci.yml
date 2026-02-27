@@ -22,4 +22,6 @@ jobs:
           cache: 'maven'
 
       - name: Compilation et Tests
-        run: MAVEN_OPTS="-XX:+EnableDynamicAgentLoading" ./mvnw clean test -B
+        run: |
+          chmod +x mvnw
+          MAVEN_OPTS="-XX:+EnableDynamicAgentLoading" ./mvnw clean test -B
