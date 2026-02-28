@@ -1,34 +1,44 @@
 package org.amsey.express_logistique.service;
 
 import org.amsey.express_logistique.entity.Colis;
+import org.amsey.express_logistique.entity.EtapeLivraison;
 import org.amsey.express_logistique.repository.ColisRepository;
+import org.amsey.express_logistique.repository.EtapeLivraisonRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
 public class ColisService {
-
+    private final EtapeLivraisonRepository etapeLivraisonRepository;
     private final ColisRepository colisRepository;
 
     // Design Pattern : Injection de Dépendances (IoC).
     // Spring se charge de fournir le repository automatiquement.
-    public ColisService(ColisRepository colisRepository) {
+
+    public ColisService(EtapeLivraisonRepository etapeLivraisonRepository, ColisRepository colisRepository) {
+        this.etapeLivraisonRepository = etapeLivraisonRepository;
         this.colisRepository = colisRepository;
     }
 
     public Colis creerColis(String nomDestinataire) {
-        Colis nouveauColis = new Colis();
-        nouveauColis.setNomDestinataire(nomDestinataire);
+        String numeroSuivi = "EXP-" + System.currentTimeMillis();
+        Colis colis = new Colis(null, numeroSuivi, nomDestinataire, "EN_PREPARATION");
+        return colisRepository.save(colis);
+    }
+    public EtapeLivraison ajouterEtape(Long colisId, String localisation, String statut) {
+        // 1. On cherche le colis de manière sécurisée
+        Colis colis = colisRepository.findById(colisId)
+                .orElseThrow(() -> new RuntimeException("Erreur : Ce colis n'existe pas dans la base."));
 
-        // Règle métier 1 : On génère un numéro de suivi unique (ex: EXP-A1B2C3D4)
-        String numeroGenere = "EXP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        nouveauColis.setNumeroSuivi(numeroGenere);
+        // 2. On crée la nouvelle étape
+        EtapeLivraison nouvelleEtape = new EtapeLivraison(colis, localisation, statut);
 
-        // Règle métier 2 : Le statut par défaut
-        nouveauColis.setStatutGlobal("EN_PREPARATION");
+        // 3. Règle métier : On met à jour le statut global du colis avec le statut de la nouvelle étape
+        colis.setStatutGlobal(statut);
+        colisRepository.save(colis);
 
-        // On sauvegarde en base de données et on retourne le résultat
-        return colisRepository.save(nouveauColis);
+        // 4. On sauvegarde et on retourne l'étape
+        return etapeLivraisonRepository.save(nouvelleEtape);
     }
 }

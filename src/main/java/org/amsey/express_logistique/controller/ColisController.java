@@ -1,7 +1,9 @@
 package org.amsey.express_logistique.controller;
 
+import org.amsey.express_logistique.dto.EtapeCreationDTO;
 import org.amsey.express_logistique.entity.Colis;
 import org.amsey.express_logistique.dto.ColisCreationDTO;
+import org.amsey.express_logistique.entity.EtapeLivraison;
 import org.amsey.express_logistique.service.ColisService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,5 +24,11 @@ public class ColisController {
     public Colis creerColis(@RequestBody ColisCreationDTO dto) {
         // On extrait uniquement ce dont on a besoin en toute sécurité
         return colisService.creerColis(dto.nomDestinataire());
+    }
+    @PostMapping("/{id}/etapes")
+    @ResponseStatus(HttpStatus.CREATED)
+    public EtapeLivraison ajouterEtapeAuColis(@PathVariable Long id, @RequestBody EtapeCreationDTO dto) {
+        // @PathVariable permet de récupérer le "id" directement dans l'URL
+        return colisService.ajouterEtape(id, dto.localisation(), dto.statut());
     }
 }

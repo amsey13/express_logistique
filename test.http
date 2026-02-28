@@ -1,0 +1,26 @@
+### 1. Création du colis initial
+POST http://localhost:8080/api/colis
+Content-Type: application/json
+
+{
+  "nomDestinataire": "Entreprise Express Guinée"
+}
+
+### 2. Ajout de la première étape de livraison (Arrivé à Conakry)
+# On utilise l'ID 1 généré par la requête précédente
+POST http://localhost:8080/api/colis/1/etapes
+Content-Type: application/json
+
+{
+  "localisation": "Agence Centrale - Conakry",
+  "statut": "ARRIVÉ"
+}
+
+### 3. Ajout d'une deuxième étape (En route vers Kankan)
+POST http://localhost:8080/api/colis/1/etapes
+Content-Type: application/json
+
+{
+  "localisation": "En transit - Route Nationale 1",
+  "statut": "EN_TRANSIT"
+}
